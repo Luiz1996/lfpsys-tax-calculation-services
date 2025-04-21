@@ -15,14 +15,14 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 @Service
-public class StocksConsumer {
+public class TaxCalculationConsumer {
 
   private static final String REDIS_KEY_PREFIX = "LFPSys:NFe_Upload:%s";
 
   private final RedisTemplate<String, String> redisTemplate;
   private final ObjectMapper objectMapper;
 
-  public StocksConsumer(final RedisTemplate<String, String> redisTemplate, final ObjectMapper objectMapper) {
+  public TaxCalculationConsumer(final RedisTemplate<String, String> redisTemplate, final ObjectMapper objectMapper) {
     this.redisTemplate = redisTemplate;
     this.objectMapper = objectMapper;
   }
