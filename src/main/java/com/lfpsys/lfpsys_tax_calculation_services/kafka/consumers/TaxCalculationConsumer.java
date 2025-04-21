@@ -2,10 +2,13 @@ package com.lfpsys.lfpsys_tax_calculation_services.kafka.consumers;
 
 import static com.lfpsys.lfpsys_tax_calculation_services.kafka.KafkaConfig.TOPIC_NAME;
 import static com.lfpsys.lfpsys_tax_calculation_services.nfe_upload.NfeUploadProcessStatus.COMPLETED;
+import static com.lfpsys.lfpsys_tax_calculation_services.nfe_upload.NfeUploadProcessType.UPDATE_FINANCIAL_CONTROLS;
+import static com.lfpsys.lfpsys_tax_calculation_services.nfe_upload.NfeUploadProcessType.UPDATE_TAX_CALCULATION;
 import static java.lang.String.format;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lfpsys.lfpsys_tax_calculation_services.PendingBeforeStepException;
 import com.lfpsys.lfpsys_tax_calculation_services.nfe_upload.NfeUploadProcessType;
 import com.lfpsys.lfpsys_tax_calculation_services.nfe_upload.NfeUploadStatusDto;
 import java.util.UUID;
@@ -28,16 +31,23 @@ public class TaxCalculationConsumer {
   }
 
   @KafkaListener(topics = TOPIC_NAME, groupId = "group_id")
-  public void consumeMessage(ConsumerRecord<String, String> consumerRecord)
-      throws JsonProcessingException, InterruptedException {
-    Thread.sleep(5000);
+  public void consumeMessage(ConsumerRecord<String, String> consumerRecord) throws JsonProcessingException {
     final var redisKey = format(REDIS_KEY_PREFIX, UUID.fromString(consumerRecord.key()));
     final var status = objectMapper.readValue(redisTemplate.opsForValue().get(redisKey), NfeUploadStatusDto.class);
+
+    final var beforeStepIsCompleted = status
+        .getProcesses()
+        .stream()
+        .anyMatch(process -> UPDATE_FINANCIAL_CONTROLS.equals(process.getProcess()) && COMPLETED.equals(process.getStatus()));
+
+    if (!beforeStepIsCompleted) {
+      throw new PendingBeforeStepException();
+    }
 
     status
         .getProcesses()
         .forEach(nfeUploadProcess -> {
-          if (NfeUploadProcessType.UPDATE_TAX_CALCULATION.equals(nfeUploadProcess.getProcess())) {
+          if (UPDATE_TAX_CALCULATION.equals(nfeUploadProcess.getProcess())) {
             nfeUploadProcess.setStatus(COMPLETED);
           }
         });

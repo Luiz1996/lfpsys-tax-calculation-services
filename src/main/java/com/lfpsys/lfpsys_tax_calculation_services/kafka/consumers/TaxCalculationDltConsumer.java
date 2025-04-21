@@ -2,6 +2,7 @@ package com.lfpsys.lfpsys_tax_calculation_services.kafka.consumers;
 
 import static com.lfpsys.lfpsys_tax_calculation_services.kafka.KafkaConfig.DLT_TOPIC_NAME;
 import static com.lfpsys.lfpsys_tax_calculation_services.nfe_upload.NfeUploadProcessStatus.ERROR;
+import static com.lfpsys.lfpsys_tax_calculation_services.nfe_upload.NfeUploadProcessType.UPDATE_TAX_CALCULATION;
 import static java.lang.String.format;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,7 +39,7 @@ public class TaxCalculationDltConsumer {
       status
           .getProcesses()
           .forEach(nfeUploadProcess -> {
-            if (NfeUploadProcessType.UPDATE_TAX_CALCULATION.equals(nfeUploadProcess.getProcess())) {
+            if (UPDATE_TAX_CALCULATION.equals(nfeUploadProcess.getProcess())) {
               nfeUploadProcess.setStatus(ERROR);
             }
           });
