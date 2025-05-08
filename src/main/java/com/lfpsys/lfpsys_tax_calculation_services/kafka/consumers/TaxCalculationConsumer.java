@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lfpsys.lfpsys_tax_calculation_services.PendingBeforeStepException;
 import com.lfpsys.lfpsys_tax_calculation_services.nfe_upload.NfeUploadProcessType;
 import com.lfpsys.lfpsys_tax_calculation_services.nfe_upload.NfeUploadStatusDto;
+import java.time.Duration;
 import java.util.UUID;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -52,6 +53,6 @@ public class TaxCalculationConsumer {
           }
         });
 
-    redisTemplate.opsForValue().set(redisKey, objectMapper.writeValueAsString(status));
+    redisTemplate.opsForValue().set(redisKey, objectMapper.writeValueAsString(status), Duration.ofDays(30));
   }
 }

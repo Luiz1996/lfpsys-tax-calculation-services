@@ -8,6 +8,7 @@ import static java.lang.String.format;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lfpsys.lfpsys_tax_calculation_services.nfe_upload.NfeUploadProcessType;
 import com.lfpsys.lfpsys_tax_calculation_services.nfe_upload.NfeUploadStatusDto;
+import java.time.Duration;
 import java.util.UUID;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
@@ -44,7 +45,7 @@ public class TaxCalculationDltConsumer {
             }
           });
 
-      redisTemplate.opsForValue().set(redisKey, objectMapper.writeValueAsString(status));
+      redisTemplate.opsForValue().set(redisKey, objectMapper.writeValueAsString(status), Duration.ofDays(30));
     } catch (Exception ex) {
       logger.error("Error: {}", ex.getMessage());
     }
